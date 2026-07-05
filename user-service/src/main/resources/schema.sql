@@ -1,0 +1,9 @@
+DROP TABLE IF EXISTS users;
+
+CREATE TABLE users (
+    id UUID NOT NULL PRIMARY KEY,
+    full_name VARCHAR(255) NOT NULL,
+    document_number VARCHAR(14) NOT NULL UNIQUE,
+    login VARCHAR(50) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL
+);

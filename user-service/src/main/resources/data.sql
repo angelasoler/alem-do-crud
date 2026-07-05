@@ -1,0 +1,2 @@
+INSERT INTO users (id, full_name, document_number, login, password_hash)
+VALUES ('9f6866a0-7195-4a9f-a8bf-3a82077b5604', 'Test User', '12345678901', 'testuser', '$2a$10$B48PQny/MDXgzffAJHda7Ol99AtXkgrN5TImv/EACAmFp0SVk9fOy');

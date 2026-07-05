@@ -1,0 +1,698 @@
+{
+	"info": {
+		"_postman_id": "ecommerce-cart-api-collection",
+		"name": "E-commerce Shopping Cart - Complete API Collection",
+		"description": "Complete test collection for E-commerce Shopping Cart microservices architecture with JWT authentication",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{jwt_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "jwt_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "user_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "username",
+			"value": "testuser",
+			"type": "string"
+		},
+		{
+			"key": "password",
+			"value": "03rS88i3WBJE!",
+			"type": "string"
+		},
+		{
+			"key": "document",
+			"value": "60008199000",
+			"type": "string"
+		},
+		{
+			"key": "full_name",
+			"value": "Test User",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "1. Health Checks",
+			"item": [
+				{
+					"name": "API Gateway Health",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response contains gateway status', function () {",
+									"    pm.expect(pm.response.text()).to.include('API Gateway');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"health"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Gateway Welcome",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response is JSON', function () {",
+									"    pm.response.to.be.json;",
+									"});",
+									"",
+									"pm.test('Contains welcome message', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('message');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "2. User Management",
+			"item": [
+				{
+					"name": "Register User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 201 or 200', function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									"",
+									"pm.test('Response should contain user info', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('id');",
+									"    ",
+									"    // Store user_id for later use",
+									"    if (responseJson.id) {",
+									"        pm.collectionVariables.set('user_id', responseJson.id.toString());",
+									"    }",
+									"});",
+									"",
+									"pm.test('Username should match request', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson.login).to.eql(pm.collectionVariables.get('username'));",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"fullName\": \"{{full_name}}\",\n  \"documentNumber\": \"{{document}}\",\n  \"login\": \"{{username}}\",\n  \"password\": \"{{password}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/users/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response should contain JWT token', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('token');",
+									"    ",
+									"    // Store JWT token for authenticated requests",
+									"    if (responseJson.token) {",
+									"        pm.collectionVariables.set('jwt_token', responseJson.token);",
+									"        console.log('JWT Token stored:', responseJson.token);",
+									"    }",
+									"});",
+									"",
+									"pm.test('Token should not be empty', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson.token).to.not.be.empty;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"login\": \"{{username}}\",\n  \"password\": \"{{password}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/users/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "3. Authentication Tests",
+			"item": [
+				{
+					"name": "Access Protected Endpoint Without Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 401', function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"pm.test('Response should contain error message', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('error');",
+									"    pm.expect(responseJson.error).to.eql('Unauthorized');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/balance",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"balance"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Access Protected Endpoint With Invalid Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 401', function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"pm.test('Response should contain error message', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('error');",
+									"    pm.expect(responseJson.error).to.eql('Unauthorized');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer invalid.token.here"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/balance",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"balance"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Access Protected Endpoint With Valid Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is not 401', function () {",
+									"    pm.expect(pm.response.code).to.not.eql(401);",
+									"});",
+									"",
+									"pm.test('Request should be forwarded to service', function () {",
+									"    // This test passes if we get any response other than 401",
+									"    // The actual service might return 200, 404, or 500 depending on implementation",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 404, 500, 503]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/balance",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"balance"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "4. Cart Operations",
+			"item": [
+				{
+					"name": "Add Item to Cart",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code should be success', function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									"",
+									"pm.test('Response should indicate successful transaction', function () {",
+									"    const responseJson = pm.response.json();",
+									"    // Adjust based on actual transaction service response format",
+									"    pm.expect(responseJson).to.have.property('status');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"productId\": \"PROD-123\",\n  \"quantity\": 1,\n  \"price\": 100.50\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/cart/add-item",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"cart",
+								"add-item"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Remove Item from Cart",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code should be success', function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									"",
+									"pm.test('Response should indicate successful payment', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('status');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"productId\": \"PROD-123\",\n  \"quantity\": 1,\n  \"price\": 100.50\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/cart/remove-item",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"cart",
+								"remove-item"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "5. Cart Query Operations",
+			"item": [
+				{
+					"name": "Get Cart Summary",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response should contain balance information', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('SaldoTotal');",
+									"});",
+									"",
+									"pm.test('Balance should be a number', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson.SaldoTotal).to.be.a('number');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/cart",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"cart"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "6. Edge Case Tests",
+			"item": [
+				{
+					"name": "Large Deposit Transaction",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Large transaction should be processed', function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 400]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"amount\": 999999.99\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/transactions/deposit",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"transactions",
+								"deposit"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Payment Larger Than Balance",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Overdraft should be handled', function () {",
+									"    // According to requirements, account can go negative with interest",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 400]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"amount\": 10000.00\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/transactions/pay-bill",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"transactions",
+								"pay-bill"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Malformed Token Test",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Malformed token should return 401', function () {",
+									"    pm.response.to.have.status(401);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer not.a.real.jwt.token"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/balance",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"balance"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

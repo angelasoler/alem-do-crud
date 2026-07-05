@@ -1,0 +1,105 @@
+{
+	"id": "cab50d60-24cf-4ee8-b31f-6d228b3bf64a",
+	"name": "E-Commerce Cart - Local Environment",
+	"values": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "jwt_token",
+			"value": "",
+			"type": "secret",
+			"enabled": true
+		},
+		{
+			"key": "user_id",
+			"value": "",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "username",
+			"value": "testuser",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "password",
+			"value": "VAyjaU1tQo97!!",
+			"type": "secret",
+			"enabled": true
+		},
+		{
+			"key": "document",
+			"value": "58054135076",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "full_name",
+			"value": "Test User",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "eureka_url",
+			"value": "http://localhost:8761",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "user_service_direct",
+			"value": "http://localhost:8081",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "transaction_service_direct",
+			"value": "http://localhost:8082",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "query_service_direct",
+			"value": "http://localhost:8083",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "test_username",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "test_document",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "test_full_name",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "test_user_id",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "test_jwt_token",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		}
+	],
+	"_postman_variable_scope": "environment",
+	"_postman_exported_at": "2025-09-24T01:05:12.260Z",
+	"_postman_exported_using": "Postman/11.62.8"
+}

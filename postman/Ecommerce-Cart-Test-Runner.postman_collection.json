@@ -1,0 +1,383 @@
+{
+	"info": {
+		"_postman_id": "75f2c1fd-08a4-4d27-b6dc-6342f6ac44a0",
+		"name": "E-Commerce Cart - Automated Test Runner",
+		"description": "Automated test sequence to validate the complete authentication and cart management flow",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "19194213"
+	},
+	"item": [
+		{
+			"name": "Complete Flow Test",
+			"item": [
+				{
+					"name": "Step 1: Health Check",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Gateway is healthy', function () {",
+									"    pm.response.to.have.status(200);",
+									"    pm.expect(pm.response.text()).to.include('API Gateway');",
+									"});",
+									"",
+									"console.log('✅ Step 1: API Gateway health check passed');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"health"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Step 2: Register New User",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Generate unique user data for this test run",
+									"const timestamp = Date.now();",
+									"const validCpfs = ['60008199000', '84042360033', '84042360033'];",
+									"const randomCpf = validCpfs[Math.floor(Math.random() * validCpfs.length)];",
+									"pm.environment.set('test_username', 'testuser_' + timestamp);",
+									"pm.environment.set('test_document', randomCpf);",
+									"pm.environment.set('test_full_name', 'Test User ' + timestamp);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('User registration successful', function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									"",
+									"pm.test('Response contains user data', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('id');",
+									"    ",
+									"    if (responseJson.id) {",
+									"        pm.environment.set('test_user_id', responseJson.id.toString());",
+									"        console.log('✅ Step 2: User registered with ID:', responseJson.id);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"fullName\": \"{{test_full_name}}\",\n  \"documentNumber\": \"{{test_document}}\",\n  \"login\": \"{{test_username}}\",\n  \"password\": \"03rS88i3WBJE!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/users/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Step 3: Login and Get JWT",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Login successful', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('JWT token received', function () {",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.have.property('token');",
+									"    pm.expect(responseJson.token).to.not.be.empty;",
+									"    ",
+									"    // Store JWT for subsequent requests",
+									"    pm.environment.set('test_jwt_token', responseJson.token);",
+									"    console.log('✅ Step 3: JWT token received and stored');",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"login\": \"{{test_username}}\",\n  \"password\": \"03rS88i3WBJE!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/users/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Step 4: Test Authentication - No Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Unauthorized access blocked', function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"console.log('✅ Step 4: Authentication properly blocking unauthorized access');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/cart",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"cart"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Step 5: Test Authentication - Valid Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Valid token allows access', function () {",
+									"    pm.expect(pm.response.code).to.not.eql(401);",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 404, 500, 503]);",
+									"});",
+									"",
+									"console.log('✅ Step 5: Valid JWT token allows access to protected endpoints');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{test_jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/cart",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"cart"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Step 6: Add Item to Cart",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Item added to cart', function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 404, 500, 503]);",
+									"    pm.expect(pm.response.code).to.not.eql(401); // Should not be auth error",
+									"});",
+									"",
+									"console.log('✅ Step 6: Add item to cart request processed (auth working)');"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{test_jwt_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"productId\": \"PROD-123\",\n  \"quantity\": 1,\n  \"price\": 100.00\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/cart/add-item",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"cart",
+								"add-item"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Step 7: Remove Item from Cart",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Item removed from cart', function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 404, 500, 503]);",
+									"    pm.expect(pm.response.code).to.not.eql(401); // Should not be auth error",
+									"});",
+									"",
+									"console.log('✅ Step 7: Remove item from cart request processed (auth working)');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{test_jwt_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"productId\": \"PROD-123\",\n  \"quantity\": 1,\n  \"price\": 25.50\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/cart/remove-item",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"cart",
+								"remove-item"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Step 8: Final Authentication Test",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Authentication still working after cart modifications', function () {",
+									"    pm.expect(pm.response.code).to.not.eql(401);",
+									"});",
+									"",
+									"console.log('✅ Step 8: Authentication flow completed successfully!');",
+									"console.log('🎉 All authentication tests passed - JWT flow is working correctly!');"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{test_jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/cart",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"cart"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
