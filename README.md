@@ -4,6 +4,66 @@ This project is a microservices-based E-commerce Shopping Cart application. It i
 
 ## Architecture
 
+```mermaid
+graph TD
+    subgraph Client [Client]
+        A[Usuário];
+    end
+
+    subgraph API Gateway [API Gateway & Segurança]
+        subgraph Validação JWT
+            D -- Válido --> E[Token Válido];
+            D -- Inválido --> F[401/403];
+        end
+        B(API Gateway)
+    end
+    
+    subgraph Backend Services
+        subgraph User Service
+            direction LR
+            C(User Service) --> C1(DB de Usuários);
+        end
+        subgraph CQRS [Arquitetura CQRS]
+            subgraph Write [Command / Escrita]
+                direction LR
+                G[Cart Command Service] --> G1(DB do Carrinho);
+            end
+
+            subgraph Read [Query / Leitura]
+                direction LR
+                H[Query Service];
+            end
+
+            subgraph Cache Service [Cache Service]
+                direction LR
+                I[Redis];
+            end
+        end
+    end
+
+    H <--> I;
+    E -- user ID do Header --> G;
+    E -- user ID do Header --> H;
+    G -- Atualização do Cache --> I;
+    B <-- Login/Cadastro --> C
+
+    A -- Requisição HTTP --> B;
+    B -- Token JWT --> D{Validar Token?};
+    D --> C;
+
+    style A fill:#f8f9fa,stroke:#f8f9fa,color:#000
+    style B fill:#e9ecef,stroke:#e9ecef,color:#000
+    style C fill:#007bff,stroke:#007bff,color:#fff
+    style C1 fill:#6c757d,stroke:#6c757d,color:#fff
+    style D fill:#c7c7c7,stroke:#c7c7c7,color:#000
+    style E fill:#d4edda,stroke:#d4edda,color:#000
+    style F fill:#f8d7da,stroke:#f8d7da,color:#000
+    style G fill:#28a745,stroke:#28a745,color:#fff
+    style G1 fill:#6c757d,stroke:#6c757d,color:#fff
+    style H fill:#dc3545,stroke:#dc3545,color:#fff
+    style I fill:#ffc107,stroke:#ffc107,color:#000
+```
+
 The application is composed of the following microservices, each with a specific responsibility:
 
 * **API Gateway**: A central entry point for all client requests. It handles authentication and routing to the appropriate backend service.
@@ -18,7 +78,7 @@ The application is composed of the following microservices, each with a specific
 
 * **Backend**: Java, Spring Boot 3.1.4
 * **API Management**: Spring Cloud Gateway, Netflix Eureka
-* **Persistence**: H2 (in-memory SQL database for commands) and Redis (for fast read caching)
+* **Persistence**: PostgreSQL (independent per-service databases for users and cart commands) and Redis (for fast read caching)
 * **Containerization**: Docker and Docker Compose
 * **Security**: Spring Security and JWT
 
