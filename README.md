@@ -114,3 +114,11 @@ The following endpoints are available. The Postman collection provided can be us
 ## Testing
 
 A Postman collection is included in the project (`postman/`) to help you test the authentication and shopping cart flows automatically.
+
+## Contact Me 👋
+
+Linkedin: [Angela Soler](https://www.linkedin.com/in/angela-soler-caro)
+
+## Reference Links
+
+* [Spring Cloud Projects](https://spring.io/projects/spring-cloud)
