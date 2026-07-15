@@ -9,6 +9,17 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
+
+  config-server:
+    build: ./config-server
+    ports:
+      - "8888:8888"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/user-service/default"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   user-service:
     build: ./user-service
     ports:
@@ -16,10 +27,13 @@ services:
     depends_on:
       discovery-server:
         condition: service_healthy
+      config-server:
+        condition: service_healthy
       user-db:
         condition: service_healthy
     environment:
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
+      - CONFIG_SERVER_URL=http://config-server:8888
+
   cart-command-service:
     build: ./cart-command-service
     ports:
@@ -27,10 +41,13 @@ services:
     depends_on:
       discovery-server:
         condition: service_healthy
+      config-server:
+        condition: service_healthy
       cart-db:
         condition: service_healthy
     environment:
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
+      - CONFIG_SERVER_URL=http://config-server:8888
+
   cart-query-service:
     build: ./cart-query-service
     ports:
@@ -38,11 +55,13 @@ services:
     depends_on:
       discovery-server:
         condition: service_healthy
+      config-server:
+        condition: service_healthy
       redis:
         condition: service_started
     environment:
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
-      - SPRING_REDIS_HOST=redis
+      - CONFIG_SERVER_URL=http://config-server:8888
+
   api-gateway:
     build: ./api-gateway
     ports:
@@ -50,8 +69,11 @@ services:
     depends_on:
       discovery-server:
         condition: service_healthy
+      config-server:
+        condition: service_healthy
     environment:
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
+      - CONFIG_SERVER_URL=http://config-server:8888
+
   redis:
     image: redis:6.2
     ports:
@@ -61,6 +83,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
   user-db:
     image: postgres:15-alpine
     ports:
@@ -74,6 +97,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
   cart-db:
     image: postgres:15-alpine
     ports:

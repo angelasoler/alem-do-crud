@@ -1,0 +1,270 @@
+{
+	"info": {
+		"_postman_id": "discovery-config-server-collection",
+		"name": "Spring Cloud Config & Eureka Discovery Demo",
+		"description": "Collection to demonstrate Spring Cloud Config Server (port 8888) and Netflix Eureka Discovery Server (port 8761) APIs in the microservices architecture.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Spring Cloud Config Server",
+			"description": "Requests to inspect the central configuration properties loaded dynamically by each microservice.",
+			"item": [
+				{
+					"name": "Get User Service Properties",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response contains name user-service', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.name).to.eql('user-service');",
+									"});",
+									"",
+									"pm.test('Response contains PostgreSQL datasource properties', function () {",
+									"    var jsonData = pm.response.json();",
+									"    var properties = jsonData.propertySources[0].source;",
+									"    pm.expect(properties['spring.datasource.url']).to.include('jdbc:postgresql://user-db:5432/user_db');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8888/user-service/default",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"user-service",
+								"default"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get API Gateway Properties",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response contains name api-gateway', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.name).to.eql('api-gateway');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8888/api-gateway/default",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"api-gateway",
+								"default"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Cart Command Service Properties",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response contains name cart-command-service', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.name).to.eql('cart-command-service');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8888/cart-command-service/default",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"cart-command-service",
+								"default"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Cart Query Service Properties",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response contains name cart-query-service', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.name).to.eql('cart-query-service');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8888/cart-query-service/default",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8888",
+							"path": [
+								"cart-query-service",
+								"default"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "2. Netflix Eureka Discovery Server",
+			"description": "Requests to inspect Eureka registration registry dashboard data dynamically.",
+			"item": [
+				{
+					"name": "Get All Registered Applications",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Eureka registry contains application instances', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.applications.application).to.be.an('array');",
+									"    pm.expect(jsonData.applications.application.length).to.be.above(0);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8761/eureka/apps",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8761",
+							"path": [
+								"eureka",
+								"apps"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Service Registry Status",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('User Service instance is registered and UP', function () {",
+									"    var jsonData = pm.response.json();",
+									"    var app = jsonData.application;",
+									"    pm.expect(app.name).to.eql('USER-SERVICE');",
+									"    pm.expect(app.instance[0].status).to.eql('UP');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8761/eureka/apps/USER-SERVICE",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8761",
+							"path": [
+								"eureka",
+								"apps",
+								"USER-SERVICE"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

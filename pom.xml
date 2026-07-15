@@ -20,6 +20,7 @@
     </properties>
 
     <modules>
+        <module>config-server</module>
         <module>user-service</module>
         <module>cart-command-service</module>
         <module>cart-query-service</module>
