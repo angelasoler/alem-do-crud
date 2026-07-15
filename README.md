@@ -74,6 +74,39 @@ The application is composed of the following microservices, each with a specific
 
 * **Cart Query Service (Read Model)**: Provides a fast, read-only view of a user's current shopping cart summary and items.
 
+### Configuration & Service Discovery Lifecycle
+
+The application integrates **Spring Cloud Config Server** for centralized configuration and **Netflix Eureka** for service discovery. The diagram below illustrates the startup, bootstrapping, configuration mapping, and discovery lifecycle:
+
+```mermaid
+graph TD
+    subgraph Boot [1. Fase de Inicialização / Bootstrap]
+        Service[Microserviço Cliente<br/>ex: user-service] -->|1. Consulta Configurações<br/>via CONFIG_SERVER_URL| ConfigServer[Spring Cloud Config Server]
+        ConfigServer -->|2. Lê Arquivos Locais<br/>Perfil Native| LocalFiles[(classpath:/shared/*.properties)]
+        LocalFiles -->|3. Retorna Propriedades| ConfigServer
+        ConfigServer -->|4. Envia Payload de Propriedades| Service
+    end
+
+    subgraph ServiceInit [2. Configuração e Conexão]
+        Service -->|5. Inicializa Spring Context com Configurações| SpringContext[Contexto Spring Boot]
+        SpringContext -->|6. Estabelece Conexões de Dados| DB[(PostgreSQL / Redis)]
+    end
+
+    subgraph Discovery [3. Fase de Registro e Descoberta]
+        SpringContext -->|7. Registra-se com status UP| Eureka[Eureka Discovery Server]
+        Gateway[API Gateway] -->|8. Consulta Instâncias Disponíveis| Eureka
+        Gateway -->|9. Roteia Tráfego via Load Balancer| Service
+    end
+
+    style Service fill:#007bff,stroke:#007bff,color:#fff
+    style ConfigServer fill:#28a745,stroke:#28a745,color:#fff
+    style LocalFiles fill:#6c757d,stroke:#6c757d,color:#fff
+    style SpringContext fill:#17a2b8,stroke:#17a2b8,color:#fff
+    style DB fill:#ffc107,stroke:#ffc107,color:#000
+    style Eureka fill:#dc3545,stroke:#dc3545,color:#fff
+    style Gateway fill:#e9ecef,stroke:#e9ecef,color:#000
+```
+
 ## Technology Stack
 
 * **Backend**: Java, Spring Boot 3.1.4
@@ -113,11 +146,14 @@ The following endpoints are available. The Postman collection provided can be us
 
 ## Testing
 
-A Postman collection is included in the project (`postman/`) to help you test the authentication and shopping cart flows automatically.
+Postman collections are included in the project (`postman/`) to help you test the microservices architecture automatically:
+* `postman/Ecommerce-Cart-API-Collection.json`: Full testing collection for user registration, authentication, and shopping cart operations.
+* `postman/Discovery-Config-Server.postman_collection.json`: Validates central configuration loading from Config Server and application status registration in Eureka.
 
-## Contact Me 👋
+## Contact 👋
 
-Linkedin: [Angela Soler](https://www.linkedin.com/in/angela-soler-caro)
+[Angela Soler](https://www.linkedin.com/in/angela-soler-caro)
+[WoHackers](https://www.linkedin.com/company/wohackers/)
 
 ## Reference Links
 
